@@ -1,0 +1,5 @@
+{
+  "name": "NCM Inteligente",
+  "description": "Uma ferramenta avançada para consulta e busca inteligente de códigos da Nomenclatura Comum do Mercosul (NCM) com suporte a impostos e termos coloquiais.",
+  "requestFramePermissions": []
+}

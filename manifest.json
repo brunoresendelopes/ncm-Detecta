@@ -1,0 +1,21 @@
+
+{
+  "short_name": "Gravelux NCM",
+  "name": "Gravelux - Consulta NCM Inteligente",
+  "icons": [
+    {
+      "src": "https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_192,h_192,al_c,q_80/Logomarca%20-%20Gravelux.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg"
+    },
+    {
+      "src": "https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_512,h_512,al_c,q_80/Logomarca%20-%20Gravelux.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#f8fafc"
+}
