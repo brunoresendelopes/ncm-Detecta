@@ -87,6 +87,14 @@ const App: React.FC = () => {
     localStorage.removeItem('ncm_history');
   };
 
+  const deleteHistoryItem = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    const newHistory = [...history];
+    newHistory.splice(index, 1);
+    setHistory(newHistory);
+    localStorage.setItem('ncm_history', JSON.stringify(newHistory));
+  };
+
   const resetApp = () => {
     setQuery('');
     setResults([]);
@@ -401,14 +409,23 @@ const App: React.FC = () => {
                   <div className="p-10 text-center text-slate-400">Nenhum histórico disponível.</div>
                 ) : (
                   history.map((h, i) => (
-                    <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors" onClick={() => { setQuery(h.query); handleSearch(undefined, h.query); }}>
+                    <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors group" onClick={() => { setQuery(h.query); handleSearch(undefined, h.query); }}>
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
                           <i className="fas fa-search text-xs"></i>
                         </div>
-                        <span className="font-bold text-slate-700">{h.query}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-700">{h.query}</span>
+                          <span className="text-[10px] font-bold text-slate-300">{new Date(h.timestamp).toLocaleDateString()} às {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-300">{new Date(h.timestamp).toLocaleDateString()}</span>
+                      <button 
+                        onClick={(e) => deleteHistoryItem(e, i)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                        title="Remover do histórico"
+                      >
+                        <i className="fas fa-trash-can text-xs"></i>
+                      </button>
                     </div>
                   ))
                 )}

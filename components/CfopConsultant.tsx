@@ -51,6 +51,18 @@ const CfopConsultant: React.FC = () => {
     localStorage.setItem('cfop_history_v2', JSON.stringify(newHistory));
   };
 
+  const deleteHistoryItem = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const newHistory = history.filter(h => h.id !== id);
+    setHistory(newHistory);
+    localStorage.setItem('cfop_history_v2', JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('cfop_history_v2');
+  };
+
   const detectSt = (ncmData: NcmData[]): { hasSt: boolean; alerts: string[] } => {
     if (ncmData.length === 0) return { hasSt: false, alerts: [] };
     
@@ -385,9 +397,12 @@ const CfopConsultant: React.FC = () => {
       {/* Histórico Recente */}
       {history.length > 0 && (
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-            <i className="fas fa-history text-slate-400"></i> Consultas Recentes
-          </h3>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+              <i className="fas fa-history text-slate-400"></i> Consultas Recentes
+            </h3>
+            <button onClick={clearHistory} className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">Limpar Tudo</button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {history.map(item => (
               <div 
@@ -399,15 +414,22 @@ const CfopConsultant: React.FC = () => {
                   setNcmQuery(item.ncm || '');
                   setResult(item);
                 }}
-                className="p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:border-blue-500 cursor-pointer transition-all group"
+                className="p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:border-blue-500 cursor-pointer transition-all group relative"
               >
+                <button 
+                  onClick={(e) => deleteHistoryItem(e, item.id)}
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-200 transition-all opacity-0 group-hover:opacity-100 z-10"
+                  title="Remover"
+                >
+                  <i className="fas fa-times text-[10px]"></i>
+                </button>
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] font-bold text-slate-400">{new Date(item.timestamp).toLocaleDateString()}</span>
                   <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${item.hasSt ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
                     {item.hasSt ? 'COM ST' : 'NORMAL'}
                   </span>
                 </div>
-                <p className="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                <p className="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors pr-6">
                   {item.productDescription || `CFOP ${item.originalCfop}`}
                 </p>
                 <div className="flex gap-4 mt-3">
