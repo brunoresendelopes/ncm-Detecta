@@ -34,8 +34,7 @@ export enum ViewMode {
   FAVORITES = 'favorites',
   HISTORY = 'history',
   DETAILS = 'details',
-  TOOLS = 'tools',
-  CFOP = 'cfop'
+  TOOLS = 'tools'
 }
 
 export interface CfopData {

@@ -47,8 +47,29 @@ const getAi = () => {
 const parseResponse = (text: string | undefined): any => {
   if (!text) return [];
   try {
-    // Tenta limpar markdown se presente
-    const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Tenta extrair o JSON se houver texto extra
+    let cleaned = text.trim();
+    const firstBracket = cleaned.indexOf('[');
+    const firstBrace = cleaned.indexOf('{');
+    
+    let start = -1;
+    if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
+      start = firstBracket;
+    } else if (firstBrace !== -1) {
+      start = firstBrace;
+    }
+
+    if (start !== -1) {
+      const lastBracket = cleaned.lastIndexOf(']');
+      const lastBrace = cleaned.lastIndexOf('}');
+      const end = Math.max(lastBracket, lastBrace);
+      if (end !== -1) {
+        cleaned = cleaned.substring(start, end + 1);
+      }
+    }
+
+    // Remove markdown se ainda presente
+    cleaned = cleaned.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleaned);
   } catch (e) {
     console.error("Erro ao parsear JSON da resposta:", e);
@@ -62,21 +83,18 @@ export const searchNcm = async (query: string): Promise<NcmData[]> => {
     const ai = getAi();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Atue como um Consultor Fiscal Sênior especializado em Comércio Exterior e TIPI. 
+      contents: `Atue como um Consultor Fiscal Sênior. 
       Analise o termo ou código: "${cleanQuery}". 
-      
-      REGRAS CRÍTICAS DE SEGURANÇA:
-      1. Se o código foi EXTINTO e DESDOBRADO, retorne as novas opções individuais e marque o antigo como obsoleto.
-      2. SEMPRE tente identificar o código CEST (Código Especificador da Substituição Tributária) correlacionado ao NCM.
-      3. Explique detalhadamente a diferença técnica no 'statusNote'.
-      4. Use como base a última atualização da TIPI e TEC de 2024/2025.`,
+      Retorne uma lista de NCMs relacionados com alíquotas de IPI, II, PIS e COFINS.
+      Se o código for antigo ou substituído, informe no campo statusNote.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: NCM_SCHEMA as any,
       },
     });
 
-    return parseResponse(response.text);
+    const results = parseResponse(response.text);
+    return Array.isArray(results) ? results : [];
   } catch (error) {
     console.error("Erro ao buscar NCM:", error);
     return [];
