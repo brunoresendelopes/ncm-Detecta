@@ -34,7 +34,37 @@ export enum ViewMode {
   FAVORITES = 'favorites',
   HISTORY = 'history',
   DETAILS = 'details',
-  TOOLS = 'tools'
+  TOOLS = 'tools',
+  CFOP = 'cfop'
+}
+
+export interface CfopData {
+  code: string;
+  description: string;
+  type: 'entrada' | 'saida';
+}
+
+export interface CfopConsultation {
+  id: string;
+  productDescription?: string;
+  ncm?: string;
+  originalCfop: string;
+  originState: string;
+  userState: string;
+  destinationState: string;
+  suggestedEntryCfop: string;
+  suggestedExitCfop: string;
+  suggestedInternalExitCfop?: string;
+  hasSt: boolean;
+  alerts: string[];
+  timestamp: number;
+}
+
+export interface NfeItem {
+  description: string;
+  originalCfop: string;
+  suggestedEntryCfop: string;
+  suggestedExitCfop: string;
 }
 
 export interface TaxCalculationResult {

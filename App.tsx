@@ -5,6 +5,7 @@ import { searchNcm, checkLegislativeUpdates } from './services/geminiService';
 import NcmCard from './components/NcmCard';
 import TaxCalculator from './components/TaxCalculator';
 import FiscalTools from './components/FiscalTools';
+import CfopConsultant from './components/CfopConsultant';
 
 const App: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -117,6 +118,11 @@ const App: React.FC = () => {
             </button>
           </li>
           <li>
+            <button onClick={() => setView(ViewMode.CFOP)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.CFOP ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-exchange-alt"></i> Consultor de CFOP
+            </button>
+          </li>
+          <li>
             <button onClick={() => setView(ViewMode.FAVORITES)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.FAVORITES ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
               <i className="fas fa-star"></i> Meus Produtos
             </button>
@@ -139,7 +145,7 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-grow p-4 md:p-10 overflow-y-auto max-h-screen">
-        {view !== ViewMode.TOOLS && view !== ViewMode.DETAILS && (
+        {view !== ViewMode.TOOLS && view !== ViewMode.CFOP && view !== ViewMode.DETAILS && (
           <header className="mb-8 max-w-4xl mx-auto">
             <form onSubmit={(e) => handleSearch(e)} className="relative group">
               <input 
@@ -160,6 +166,10 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto pb-20">
           {view === ViewMode.TOOLS && (
             <FiscalTools onResults={handleFiscalResults} />
+          )}
+
+          {view === ViewMode.CFOP && (
+            <CfopConsultant />
           )}
 
           {view === ViewMode.SEARCH && (
