@@ -1,12 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { CfopConsultation, NcmData } from '../types';
+import { CfopConsultation, NcmData, BRAZIL_STATES } from '../types';
 import { searchNcm } from '../services/geminiService';
-
-const BRAZIL_STATES = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO', 'EX'
-];
 
 const CFOP_DESCRIPTIONS: Record<string, string> = {
   '1102': 'Compra para comercialização (Dentro do Estado)',

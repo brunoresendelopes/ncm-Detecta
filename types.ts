@@ -1,4 +1,9 @@
 
+export const BRAZIL_STATES = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
+  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO', 'EX'
+];
+
 export interface NcmTax {
   name: string;
   rate: string;
@@ -34,7 +39,8 @@ export enum ViewMode {
   FAVORITES = 'favorites',
   HISTORY = 'history',
   DETAILS = 'details',
-  TOOLS = 'tools'
+  TOOLS = 'tools',
+  CFOP = 'cfop'
 }
 
 export interface CfopData {

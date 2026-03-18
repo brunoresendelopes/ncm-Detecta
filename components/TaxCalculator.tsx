@@ -1,14 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { NcmData, TaxCalculationResult } from '../types';
+import { NcmData, TaxCalculationResult, BRAZIL_STATES } from '../types';
 
 interface TaxCalculatorProps {
   ncm: NcmData;
 }
-
-const BRAZIL_STATES = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
-];
 
 const TaxCalculator: React.FC<TaxCalculatorProps> = ({ ncm }) => {
   const [value, setValue] = useState<number>(0);

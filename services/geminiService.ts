@@ -172,7 +172,7 @@ export const checkLegislativeUpdates = async (ncms: string[]): Promise<Record<st
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3.1-pro-preview",
       contents: `Verifique se houve alterações recentes (Resoluções GECEX ou TIPI 2024/2025) para os seguintes NCMs: ${ncms.join(', ')}. 
       Retorne um JSON onde a chave é o NCM e o valor é uma descrição da alteração ou 'null' se não houver mudança.`,
       config: {
