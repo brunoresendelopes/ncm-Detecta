@@ -418,10 +418,10 @@ const CfopConsultant: React.FC = () => {
               >
                 <button 
                   onClick={(e) => deleteHistoryItem(e, item.id)}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-200 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-500 md:bg-white md:border-slate-200 md:text-slate-300 hover:text-red-600 hover:border-red-200 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-20"
                   title="Remover"
                 >
-                  <i className="fas fa-times text-[10px]"></i>
+                  <i className="fas fa-times text-xs"></i>
                 </button>
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] font-bold text-slate-400">{new Date(item.timestamp).toLocaleDateString()}</span>
