@@ -17,31 +17,47 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [updates, setUpdates] = useState<Record<string, string>>({});
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // Persistence
   useEffect(() => {
-    const savedFavorites = localStorage.getItem('ncm_favorites');
-    const savedHistory = localStorage.getItem('ncm_history');
-    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
-    if (savedHistory) setHistory(JSON.parse(savedHistory));
+    try {
+      const savedFavorites = localStorage.getItem('ncm_favorites');
+      const savedHistory = localStorage.getItem('ncm_history');
+      if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
+      if (savedHistory) setHistory(JSON.parse(savedHistory));
+    } catch (err) {
+      console.warn('Não foi possível carregar dados salvos:', err);
+    } finally {
+      setInitialized(true);
+    }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('ncm_favorites', JSON.stringify(favorites));
-  }, [favorites]);
+    if (!initialized) return;
+    try {
+      localStorage.setItem('ncm_favorites', JSON.stringify(favorites));
+    } catch (err) {
+      console.warn('Não foi possível salvar favoritos:', err);
+    }
+  }, [favorites, initialized]);
 
   useEffect(() => {
-    localStorage.setItem('ncm_history', JSON.stringify(history));
-  }, [history]);
+    if (!initialized) return;
+    try {
+      localStorage.setItem('ncm_history', JSON.stringify(history));
+    } catch (err) {
+      console.warn('Não foi possível salvar histórico:', err);
+    }
+  }, [history, initialized]);
 
-  const handleSearch = async (e?: React.FormEvent, customQuery?: string) => {
-    if (e) e.preventDefault();
-    const searchTerm = customQuery || query;
+  // Executa a busca — usada internamente por ambos os handlers
+  const executeSearch = async (searchTerm: string) => {
     if (!searchTerm.trim()) return;
 
     setLoading(true);
     setView(ViewMode.SEARCH);
-    
+
     const newHistory = [
       { query: searchTerm, timestamp: Date.now() },
       ...history.filter(h => h.query !== searchTerm)
@@ -51,6 +67,12 @@ const App: React.FC = () => {
     const data = await searchNcm(searchTerm);
     setResults(data);
     setLoading(false);
+  };
+
+  // Handler do formulário (chamado pelo onSubmit do <form>)
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    executeSearch(query);
   };
 
   const handleFiscalResults = (data: NcmData[]) => {
@@ -84,7 +106,7 @@ const App: React.FC = () => {
 
   const clearHistory = () => {
     setHistory([]);
-    localStorage.removeItem('ncm_history');
+    // localStorage é atualizado automaticamente pelo useEffect
   };
 
   const deleteHistoryItem = (e: React.MouseEvent, index: number) => {
@@ -92,7 +114,7 @@ const App: React.FC = () => {
     const newHistory = [...history];
     newHistory.splice(index, 1);
     setHistory(newHistory);
-    localStorage.setItem('ncm_history', JSON.stringify(newHistory));
+    // localStorage é atualizado automaticamente pelo useEffect
   };
 
   const resetApp = () => {
@@ -164,7 +186,7 @@ const App: React.FC = () => {
       <main className="flex-grow p-4 md:p-10 overflow-y-auto md:max-h-screen">
         {view !== ViewMode.TOOLS && view !== ViewMode.CFOP && view !== ViewMode.DETAILS && (
           <header className="mb-8 max-w-4xl mx-auto">
-            <form onSubmit={(e) => handleSearch(e)} className="relative group">
+            <form onSubmit={handleSearch} className="relative group">
               <input 
                 type="text" 
                 value={query}
@@ -263,7 +285,7 @@ const App: React.FC = () => {
                           {selectedNcm.replacementCode.split(',').map(code => (
                             <button 
                               key={code}
-                              onClick={() => { setQuery(code.trim()); handleSearch(undefined, code.trim()); }}
+                              onClick={() => { setQuery(code.trim()); executeSearch(code.trim()); }}
                               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-md transition-all"
                             >
                               {code.trim()}
@@ -392,7 +414,7 @@ const App: React.FC = () => {
                   <div className="p-10 text-center text-slate-400">Nenhum histórico disponível.</div>
                 ) : (
                   history.map((h, i) => (
-                    <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors group" onClick={() => { setQuery(h.query); handleSearch(undefined, h.query); }}>
+                    <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors group" onClick={() => { setQuery(h.query); executeSearch(h.query); }}>
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
                           <i className="fas fa-search text-xs"></i>
