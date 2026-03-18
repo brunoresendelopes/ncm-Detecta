@@ -206,6 +206,7 @@ const CfopConsultant: React.FC = () => {
                   type="text" 
                   value={originalCfop}
                   onChange={(e) => setOriginalCfop(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConsult()}
                   placeholder="Ex: 6102"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono"
                 />
@@ -231,6 +232,7 @@ const CfopConsultant: React.FC = () => {
                   type="text" 
                   value={ncmQuery}
                   onChange={(e) => setNcmQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConsult()}
                   placeholder="Ex: 8482.10.10"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono"
                 />

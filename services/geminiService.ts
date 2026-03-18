@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { NcmData, ProductClassificationInput } from "../types";
 
 const NCM_SCHEMA = {
@@ -85,11 +85,12 @@ export const searchNcm = async (query: string): Promise<NcmData[]> => {
       model: "gemini-3-flash-preview",
       contents: `Atue como um Consultor Fiscal Sênior. 
       Analise o termo ou código: "${cleanQuery}". 
-      Retorne uma lista de NCMs relacionados com alíquotas de IPI, II, PIS e COFINS.
+      Retorne uma lista de ATÉ 5 NCMs relacionados com alíquotas de IPI, II, PIS e COFINS.
       Se o código for antigo ou substituído, informe no campo statusNote.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: NCM_SCHEMA as any,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
       },
     });
 
@@ -124,6 +125,7 @@ export const classifyProduct = async (input: ProductClassificationInput): Promis
       config: {
         responseMimeType: "application/json",
         responseSchema: NCM_SCHEMA as any,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
       },
     });
 
@@ -158,6 +160,7 @@ export const analyzeDocument = async (xmlContent?: string, nfKey?: string): Prom
       config: {
         responseMimeType: "application/json",
         responseSchema: NCM_SCHEMA as any,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
       },
     });
 
@@ -172,11 +175,12 @@ export const checkLegislativeUpdates = async (ncms: string[]): Promise<Record<st
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-3-flash-preview",
       contents: `Verifique se houve alterações recentes (Resoluções GECEX ou TIPI 2024/2025) para os seguintes NCMs: ${ncms.join(', ')}. 
       Retorne um JSON onde a chave é o NCM e o valor é uma descrição da alteração ou 'null' se não houver mudança.`,
       config: {
         responseMimeType: "application/json",
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
       },
     });
     return parseResponse(response.text);
