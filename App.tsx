@@ -18,6 +18,8 @@ const App: React.FC = () => {
   const [updates, setUpdates] = useState<Record<string, string>>({});
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Persistence
   useEffect(() => {
@@ -56,19 +58,25 @@ const App: React.FC = () => {
     if (!searchTerm.trim()) return;
 
     setLoading(true);
+    setError(null);
     setView(ViewMode.SEARCH);
+    setIsSidebarOpen(false);
 
     try {
       const newHistory = [
-        { query: searchTerm, timestamp: Date.now() },
-        ...history.filter(h => h.query !== searchTerm)
+        { query: searchTerm.trim(), timestamp: Date.now() },
+        ...history.filter(h => h.query !== searchTerm.trim())
       ].slice(0, 10);
       setHistory(newHistory);
 
-      const data = await searchNcm(searchTerm);
+      const data = await searchNcm(searchTerm.trim());
       setResults(data);
-    } catch (error) {
-      console.error("Erro na busca:", error);
+      if (data.length === 0) {
+        setError("Não encontramos resultados exatos. Tente simplificar sua busca ou use o Classificador Guiado.");
+      }
+    } catch (err: any) {
+      console.error("Erro na busca:", err);
+      setError("Ocorreu um erro ao conectar com a base de dados. Verifique sua conexão ou tente novamente mais tarde.");
     } finally {
       setLoading(false);
     }
@@ -129,55 +137,79 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900 overflow-hidden">
-      {/* Sidebar */}
-      <nav className="w-full md:w-64 bg-slate-900 text-slate-300 p-4 md:p-6 flex flex-row md:flex-col shrink-0 border-b md:border-r border-slate-800 z-20 overflow-x-auto md:overflow-x-visible no-scrollbar">
-        <div onClick={resetApp} className="mb-0 md:mb-8 group cursor-pointer shrink-0 flex items-center md:block mr-4 md:mr-0">
-          <div className="relative overflow-hidden rounded-lg bg-white p-1 border border-white/10 group-hover:border-blue-500/50 transition-all duration-300 shadow-lg w-10 h-10 md:w-full md:h-auto">
-            <img src="https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_448,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logomarca%20-%20Gravelux%20-%20letra%20Azul.jpg" alt="Gravelux Logo" className="w-full h-full md:h-auto object-contain rounded" />
+    <div className="h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900 overflow-hidden relative">
+      {/* Mobile Header */}
+      <header className="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between z-30 shadow-lg shrink-0">
+        <div onClick={resetApp} className="flex items-center gap-3 cursor-pointer">
+          <div className="w-8 h-8 bg-white rounded-lg p-1">
+            <img src="https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_448,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logomarca%20-%20Gravelux%20-%20letra%20Azul.jpg" alt="Logo" className="w-full h-full object-contain" />
           </div>
-          <div className="hidden md:flex mt-3 items-center justify-between px-1">
+          <span className="font-black text-xs uppercase tracking-widest">Gravelux NCM</span>
+        </div>
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800">
+          <i className={`fas ${isSidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
+        </button>
+      </header>
+
+      {/* Sidebar Overlay (Mobile) */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm animate-fade-in"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      {/* Sidebar */}
+      <nav className={`
+        fixed md:relative inset-y-0 left-0 w-72 md:w-64 bg-slate-900 text-slate-300 p-6 flex flex-col shrink-0 border-r border-slate-800 z-50 
+        transition-transform duration-300 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <div onClick={resetApp} className="mb-8 group cursor-pointer hidden md:block">
+          <div className="relative overflow-hidden rounded-xl bg-white p-1 border border-white/10 group-hover:border-blue-500/50 transition-all duration-300 shadow-lg">
+            <img src="https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_448,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logomarca%20-%20Gravelux%20-%20letra%20Azul.jpg" alt="Gravelux Logo" className="w-full h-auto rounded-lg" />
+          </div>
+          <div className="mt-3 flex items-center justify-between px-1">
             <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">Inteligência Fiscal</span>
           </div>
         </div>
 
-        <ul className="flex flex-row md:flex-col gap-2 flex-grow">
-          <li className="shrink-0">
-            <button onClick={() => setView(ViewMode.SEARCH)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.SEARCH ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-search"></i> <span className="md:inline">Consulta</span>
+        <ul className="space-y-2 flex-grow">
+          <li>
+            <button onClick={() => { setView(ViewMode.SEARCH); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.SEARCH ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-search"></i> Consulta Rápida
             </button>
           </li>
-          <li className="shrink-0">
-            <button onClick={() => setView(ViewMode.TOOLS)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.TOOLS ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-wand-magic-sparkles"></i> <span className="md:inline">Classificador</span>
+          <li>
+            <button onClick={() => { setView(ViewMode.TOOLS); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.TOOLS ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-wand-magic-sparkles"></i> Classificador & NF
             </button>
           </li>
-          <li className="shrink-0">
-            <button onClick={() => setView(ViewMode.CFOP)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.CFOP ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-exchange-alt"></i> <span className="md:inline">CFOP</span>
+          <li>
+            <button onClick={() => { setView(ViewMode.CFOP); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.CFOP ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-exchange-alt"></i> Consultor de CFOP
             </button>
           </li>
-          <li className="shrink-0">
-            <button onClick={() => setView(ViewMode.FAVORITES)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.FAVORITES ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-star"></i> <span className="md:inline">Favoritos</span>
+          <li>
+            <button onClick={() => { setView(ViewMode.FAVORITES); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.FAVORITES ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-star"></i> Meus Produtos
             </button>
           </li>
-          <li className="shrink-0">
-            <button onClick={() => setView(ViewMode.HISTORY)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.HISTORY ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-history"></i> <span className="md:inline">Histórico</span>
+          <li>
+            <button onClick={() => { setView(ViewMode.HISTORY); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.HISTORY ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-history"></i> Histórico
             </button>
           </li>
         </ul>
 
-        {/* Disclaimer na Sidebar - Escondido no mobile para economizar espaço */}
-        <div className="hidden md:block mt-auto space-y-4">
+        {/* Disclaimer na Sidebar */}
+        <div className="mt-auto space-y-4">
           <div className="p-4 bg-blue-600/10 rounded-xl border border-blue-600/20">
             <p className="text-[9px] text-blue-400 uppercase font-bold tracking-wider mb-2">Dica de App</p>
             <p className="text-[10px] text-blue-200 leading-tight">
               Para usar em tela cheia no celular, toque em "Compartilhar" e selecione "Adicionar à Tela de Início".
             </p>
           </div>
-          
           <div className="p-4 bg-slate-800/50 rounded-xl border border-white/5">
             <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-2">Aviso Legal</p>
             <p className="text-[10px] text-slate-400 leading-tight">
@@ -191,17 +223,17 @@ const App: React.FC = () => {
       <main className="flex-grow p-4 md:p-10 overflow-y-auto md:max-h-screen">
         {view !== ViewMode.TOOLS && view !== ViewMode.CFOP && view !== ViewMode.DETAILS && (
           <header className="mb-8 max-w-4xl mx-auto">
-            <form onSubmit={handleSearch} className="relative group z-30">
+            <form onSubmit={handleSearch} className="relative group z-20">
               <input 
                 type="text" 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Digite o código ou descrição..."
-                className="w-full pl-10 md:pl-12 pr-16 md:pr-36 py-4 md:py-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 outline-none text-base md:text-lg text-slate-900"
+                placeholder="Digite o código ou descrição do produto..."
+                className="w-full pl-12 pr-32 py-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 outline-none text-lg text-slate-900"
               />
-              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg md:text-xl"></i>
-              <button type="submit" disabled={loading} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-8 py-2 md:py-2.5 rounded-xl transition-colors font-bold disabled:opacity-50 z-40">
-                {loading ? <i className="fas fa-sync fa-spin"></i> : <><i className="fas fa-arrow-right md:hidden"></i><span className="hidden md:inline">Consultar</span></>}
+              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
+              <button type="submit" disabled={loading} className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl transition-colors font-bold disabled:opacity-50">
+                {loading ? <i className="fas fa-sync fa-spin"></i> : 'Consultar'}
               </button>
             </form>
           </header>
@@ -222,6 +254,17 @@ const App: React.FC = () => {
                 <div className="w-16 h-16 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4"></div>
                 <p className="font-bold text-slate-600">Consultando base de dados fiscal...</p>
                 <p className="text-xs mt-1">Verificando TEC, TIPI, CEST e Resoluções GECEX</p>
+              </div>
+            ) : error ? (
+              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-slate-100 shadow-sm animate-in fade-in zoom-in-95 duration-300">
+                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="fas fa-exclamation-triangle text-3xl"></i>
+                </div>
+                <h3 className="text-xl font-black text-slate-800 mb-2">Ops! Algo deu errado</h3>
+                <p className="text-slate-500 mb-6 max-w-sm mx-auto">{error}</p>
+                <button onClick={() => setView(ViewMode.TOOLS)} className="text-blue-600 font-black uppercase tracking-widest text-xs hover:underline">
+                  Tente usar o Classificador Guiado
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">

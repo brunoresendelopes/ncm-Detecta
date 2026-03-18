@@ -57,12 +57,13 @@ const parseResponse = (text: string | undefined): any => {
 };
 
 export const searchNcm = async (query: string): Promise<NcmData[]> => {
+  const cleanQuery = query.trim();
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Atue como um Consultor Fiscal Sênior especializado em Comércio Exterior e TIPI. 
-      Analise o termo ou código: "${query}". 
+      Analise o termo ou código: "${cleanQuery}". 
       
       REGRAS CRÍTICAS DE SEGURANÇA:
       1. Se o código foi EXTINTO e DESDOBRADO, retorne as novas opções individuais e marque o antigo como obsoleto.
