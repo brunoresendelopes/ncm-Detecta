@@ -101,18 +101,6 @@ const App: React.FC = () => {
     setView(ViewMode.SEARCH);
   };
 
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900">
       {/* Sidebar */}
@@ -152,11 +140,6 @@ const App: React.FC = () => {
               <i className="fas fa-history"></i> Histórico
             </button>
           </li>
-          <li>
-            <button onClick={toggleFullScreen} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm hover:bg-slate-800 text-slate-400">
-              <i className="fas fa-expand"></i> Tela Cheia
-            </button>
-          </li>
         </ul>
 
         {/* Disclaimer na Sidebar */}
@@ -178,7 +161,7 @@ const App: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow p-4 md:p-10 overflow-y-auto max-h-screen">
+      <main className="flex-grow p-4 md:p-10 overflow-y-auto md:max-h-screen">
         {view !== ViewMode.TOOLS && view !== ViewMode.CFOP && view !== ViewMode.DETAILS && (
           <header className="mb-8 max-w-4xl mx-auto">
             <form onSubmit={(e) => handleSearch(e)} className="relative group">

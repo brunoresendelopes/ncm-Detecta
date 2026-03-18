@@ -2,8 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { NcmData, ProductClassificationInput } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const NCM_SCHEMA = {
   type: Type.ARRAY,
   items: {
@@ -38,8 +36,29 @@ const NCM_SCHEMA = {
   }
 };
 
+const getAi = () => {
+  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("API Key não configurada");
+  }
+  return new GoogleGenAI({ apiKey });
+};
+
+const parseResponse = (text: string | undefined): any => {
+  if (!text) return [];
+  try {
+    // Tenta limpar markdown se presente
+    const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error("Erro ao parsear JSON da resposta:", e);
+    return [];
+  }
+};
+
 export const searchNcm = async (query: string): Promise<NcmData[]> => {
   try {
+    const ai = getAi();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Atue como um Consultor Fiscal Sênior especializado em Comércio Exterior e TIPI. 
@@ -56,7 +75,7 @@ export const searchNcm = async (query: string): Promise<NcmData[]> => {
       },
     });
 
-    return JSON.parse(response.text || "[]");
+    return parseResponse(response.text);
   } catch (error) {
     console.error("Erro ao buscar NCM:", error);
     return [];
@@ -65,6 +84,7 @@ export const searchNcm = async (query: string): Promise<NcmData[]> => {
 
 export const classifyProduct = async (input: ProductClassificationInput): Promise<NcmData[]> => {
   try {
+    const ai = getAi();
     const prompt = `Atue como um Especialista em Classificação Tarifária (NCM) para Indústria e Comércio.
     O usuário deseja classificar um produto novo para fabricação ou revenda.
     
@@ -88,7 +108,7 @@ export const classifyProduct = async (input: ProductClassificationInput): Promis
       },
     });
 
-    return JSON.parse(response.text || "[]");
+    return parseResponse(response.text);
   } catch (error) {
     console.error("Erro ao classificar produto:", error);
     return [];
@@ -97,6 +117,7 @@ export const classifyProduct = async (input: ProductClassificationInput): Promis
 
 export const analyzeDocument = async (xmlContent?: string, nfKey?: string): Promise<NcmData[]> => {
   try {
+    const ai = getAi();
     let prompt = "";
     
     if (xmlContent) {
@@ -121,7 +142,7 @@ export const analyzeDocument = async (xmlContent?: string, nfKey?: string): Prom
       },
     });
 
-    return JSON.parse(response.text || "[]");
+    return parseResponse(response.text);
   } catch (error) {
     console.error("Erro ao analisar documento:", error);
     return [];
@@ -130,6 +151,7 @@ export const analyzeDocument = async (xmlContent?: string, nfKey?: string): Prom
 
 export const checkLegislativeUpdates = async (ncms: string[]): Promise<Record<string, string>> => {
   try {
+    const ai = getAi();
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: `Verifique se houve alterações recentes (Resoluções GECEX ou TIPI 2024/2025) para os seguintes NCMs: ${ncms.join(', ')}. 
@@ -138,7 +160,7 @@ export const checkLegislativeUpdates = async (ncms: string[]): Promise<Record<st
         responseMimeType: "application/json",
       },
     });
-    return JSON.parse(response.text || "{}");
+    return parseResponse(response.text);
   } catch (error) {
     console.error("Erro ao verificar atualizações:", error);
     return {};

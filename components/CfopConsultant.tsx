@@ -29,7 +29,6 @@ const CfopConsultant: React.FC = () => {
   const [destinationState, setDestinationState] = useState('MG');
   const [ncmQuery, setNcmQuery] = useState('');
   const [isSearchingNcm, setIsSearchingNcm] = useState(false);
-  const [showMixedMode, setShowMixedMode] = useState(false);
   const [isStProduct, setIsStProduct] = useState(false);
   const [stAlreadyWithheld, setStAlreadyWithheld] = useState(false);
   
@@ -246,17 +245,6 @@ const CfopConsultant: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 ml-1">
-              <input 
-                type="checkbox" 
-                id="mixedMode" 
-                checked={showMixedMode}
-                onChange={(e) => setShowMixedMode(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-              />
-              <label htmlFor="mixedMode" className="text-xs font-bold text-slate-600 cursor-pointer">Exibir comparativo de revenda interna</label>
-            </div>
-
             {isStProduct && (
               <div className="p-5 bg-blue-50 rounded-2xl border border-blue-100 space-y-3 animate-in slide-in-from-top-2 duration-300">
                 <p className="text-xs font-bold text-blue-900">A nota fiscal já possui ST retida pelo fornecedor (campo vICMSST preenchido)?</p>
@@ -318,7 +306,7 @@ const CfopConsultant: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-emerald-500 transition-all relative">
                       <button 
                         onClick={() => copyToClipboard(result.suggestedExitCfop)}
@@ -335,25 +323,6 @@ const CfopConsultant: React.FC = () => {
                         {CFOP_DESCRIPTIONS[result.suggestedExitCfop] || 'Código de saída para revenda.'}
                       </p>
                     </div>
-
-                    {showMixedMode && result.suggestedInternalExitCfop && (
-                      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-slate-500 transition-all relative">
-                        <button 
-                          onClick={() => copyToClipboard(result.suggestedInternalExitCfop || '')}
-                          className="absolute top-4 right-4 text-slate-300 hover:text-slate-600 transition-colors"
-                          title="Copiar CFOP"
-                        >
-                          <i className="fas fa-copy"></i>
-                        </button>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Saída Interna ({result.userState})</p>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-mono font-black text-slate-900">{result.suggestedInternalExitCfop}</span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-2 leading-tight">
-                          {CFOP_DESCRIPTIONS[result.suggestedInternalExitCfop] || 'Código de saída para revenda interna.'}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
