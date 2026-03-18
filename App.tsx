@@ -58,15 +58,20 @@ const App: React.FC = () => {
     setLoading(true);
     setView(ViewMode.SEARCH);
 
-    const newHistory = [
-      { query: searchTerm, timestamp: Date.now() },
-      ...history.filter(h => h.query !== searchTerm)
-    ].slice(0, 10);
-    setHistory(newHistory);
+    try {
+      const newHistory = [
+        { query: searchTerm, timestamp: Date.now() },
+        ...history.filter(h => h.query !== searchTerm)
+      ].slice(0, 10);
+      setHistory(newHistory);
 
-    const data = await searchNcm(searchTerm);
-    setResults(data);
-    setLoading(false);
+      const data = await searchNcm(searchTerm);
+      setResults(data);
+    } catch (error) {
+      console.error("Erro na busca:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handler do formulário (chamado pelo onSubmit do <form>)
@@ -124,48 +129,48 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900">
+    <div className="h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900 overflow-hidden">
       {/* Sidebar */}
-      <nav className="w-full md:w-64 bg-slate-900 text-slate-300 p-6 flex flex-col shrink-0 border-r border-slate-800 z-10">
-        <div onClick={resetApp} className="mb-8 group cursor-pointer">
-          <div className="relative overflow-hidden rounded-xl bg-white p-1 border border-white/10 group-hover:border-blue-500/50 transition-all duration-300 shadow-lg">
-            <img src="https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_448,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logomarca%20-%20Gravelux%20-%20letra%20Azul.jpg" alt="Gravelux Logo" className="w-full h-auto rounded-lg" />
+      <nav className="w-full md:w-64 bg-slate-900 text-slate-300 p-4 md:p-6 flex flex-row md:flex-col shrink-0 border-b md:border-r border-slate-800 z-20 overflow-x-auto md:overflow-x-visible no-scrollbar">
+        <div onClick={resetApp} className="mb-0 md:mb-8 group cursor-pointer shrink-0 flex items-center md:block mr-4 md:mr-0">
+          <div className="relative overflow-hidden rounded-lg bg-white p-1 border border-white/10 group-hover:border-blue-500/50 transition-all duration-300 shadow-lg w-10 h-10 md:w-full md:h-auto">
+            <img src="https://static.wixstatic.com/media/b51f66_1df9a8c2938844ecb9b434875a6f5c2c~mv2.jpg/v1/fill/w_448,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logomarca%20-%20Gravelux%20-%20letra%20Azul.jpg" alt="Gravelux Logo" className="w-full h-full md:h-auto object-contain rounded" />
           </div>
-          <div className="mt-3 flex items-center justify-between px-1">
+          <div className="hidden md:flex mt-3 items-center justify-between px-1">
             <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">Inteligência Fiscal</span>
           </div>
         </div>
 
-        <ul className="space-y-2 flex-grow">
-          <li>
-            <button onClick={() => setView(ViewMode.SEARCH)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.SEARCH ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-search"></i> Consulta Rápida
+        <ul className="flex flex-row md:flex-col gap-2 flex-grow">
+          <li className="shrink-0">
+            <button onClick={() => setView(ViewMode.SEARCH)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.SEARCH ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-search"></i> <span className="md:inline">Consulta</span>
             </button>
           </li>
-          <li>
-            <button onClick={() => setView(ViewMode.TOOLS)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.TOOLS ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-wand-magic-sparkles"></i> Classificador & NF
+          <li className="shrink-0">
+            <button onClick={() => setView(ViewMode.TOOLS)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.TOOLS ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-wand-magic-sparkles"></i> <span className="md:inline">Classificador</span>
             </button>
           </li>
-          <li>
-            <button onClick={() => setView(ViewMode.CFOP)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.CFOP ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-exchange-alt"></i> Consultor de CFOP
+          <li className="shrink-0">
+            <button onClick={() => setView(ViewMode.CFOP)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.CFOP ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-exchange-alt"></i> <span className="md:inline">CFOP</span>
             </button>
           </li>
-          <li>
-            <button onClick={() => setView(ViewMode.FAVORITES)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.FAVORITES ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-star"></i> Meus Produtos
+          <li className="shrink-0">
+            <button onClick={() => setView(ViewMode.FAVORITES)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.FAVORITES ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-star"></i> <span className="md:inline">Favoritos</span>
             </button>
           </li>
-          <li>
-            <button onClick={() => setView(ViewMode.HISTORY)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm ${view === ViewMode.HISTORY ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
-              <i className="fas fa-history"></i> Histórico
+          <li className="shrink-0">
+            <button onClick={() => setView(ViewMode.HISTORY)} className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-colors font-bold text-xs md:text-sm whitespace-nowrap ${view === ViewMode.HISTORY ? 'bg-slate-800 text-white' : 'hover:bg-slate-800'}`}>
+              <i className="fas fa-history"></i> <span className="md:inline">Histórico</span>
             </button>
           </li>
         </ul>
 
-        {/* Disclaimer na Sidebar */}
-        <div className="mt-auto space-y-4">
+        {/* Disclaimer na Sidebar - Escondido no mobile para economizar espaço */}
+        <div className="hidden md:block mt-auto space-y-4">
           <div className="p-4 bg-blue-600/10 rounded-xl border border-blue-600/20">
             <p className="text-[9px] text-blue-400 uppercase font-bold tracking-wider mb-2">Dica de App</p>
             <p className="text-[10px] text-blue-200 leading-tight">
@@ -186,17 +191,17 @@ const App: React.FC = () => {
       <main className="flex-grow p-4 md:p-10 overflow-y-auto md:max-h-screen">
         {view !== ViewMode.TOOLS && view !== ViewMode.CFOP && view !== ViewMode.DETAILS && (
           <header className="mb-8 max-w-4xl mx-auto">
-            <form onSubmit={handleSearch} className="relative group">
+            <form onSubmit={handleSearch} className="relative group z-30">
               <input 
                 type="text" 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Digite o código ou descrição do produto..."
-                className="w-full pl-12 pr-4 py-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 outline-none text-lg text-slate-900"
+                placeholder="Digite o código ou descrição..."
+                className="w-full pl-10 md:pl-12 pr-16 md:pr-36 py-4 md:py-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-600 outline-none text-base md:text-lg text-slate-900"
               />
-              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
-              <button type="submit" disabled={loading} className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl transition-colors font-bold disabled:opacity-50">
-                {loading ? <i className="fas fa-sync fa-spin"></i> : 'Consultar'}
+              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg md:text-xl"></i>
+              <button type="submit" disabled={loading} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-8 py-2 md:py-2.5 rounded-xl transition-colors font-bold disabled:opacity-50 z-40">
+                {loading ? <i className="fas fa-sync fa-spin"></i> : <><i className="fas fa-arrow-right md:hidden"></i><span className="hidden md:inline">Consultar</span></>}
               </button>
             </form>
           </header>

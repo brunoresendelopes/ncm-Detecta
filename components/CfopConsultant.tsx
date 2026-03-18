@@ -120,47 +120,56 @@ const CfopConsultant: React.FC = () => {
     let alerts: string[] = [];
     let productDescription = '';
 
-    if (ncmQuery.trim()) {
-      setIsSearchingNcm(true);
-      const ncmData = await searchNcm(ncmQuery);
-      const stInfo = detectSt(ncmData);
-      hasSt = stInfo.hasSt;
-      alerts = stInfo.alerts;
-      if (ncmData.length > 0) {
-        productDescription = ncmData[0].description;
+    try {
+      if (ncmQuery.trim()) {
+        setIsSearchingNcm(true);
+        const ncmData = await searchNcm(ncmQuery);
+        const stInfo = detectSt(ncmData);
+        hasSt = stInfo.hasSt;
+        alerts = stInfo.alerts;
+        if (ncmData.length > 0) {
+          productDescription = ncmData[0].description;
+        }
+        setIsStProduct(hasSt);
+      } else {
+        setIsStProduct(false);
       }
+
+      const entry = convertCfop(originalCfop, originState, userState, true, hasSt, stAlreadyWithheld);
+      const exit = convertCfop(originalCfop, userState, destinationState, false, hasSt, stAlreadyWithheld);
+      const internalExit = convertCfop(originalCfop, userState, userState, false, hasSt, stAlreadyWithheld);
+
+      const newConsultation: CfopConsultation = {
+        id: Date.now().toString(),
+        productDescription,
+        ncm: ncmQuery,
+        originalCfop,
+        originState,
+        userState,
+        destinationState,
+        suggestedEntryCfop: entry,
+        suggestedExitCfop: exit,
+        suggestedInternalExitCfop: internalExit,
+        hasSt,
+        alerts,
+        timestamp: Date.now()
+      };
+
+      setResult(newConsultation);
+      saveToHistory(newConsultation);
+    } catch (error) {
+      console.error("Erro na consulta de CFOP:", error);
+    } finally {
       setIsSearchingNcm(false);
-      setIsStProduct(hasSt);
-    } else {
-      setIsStProduct(false);
     }
-
-    const entry = convertCfop(originalCfop, originState, userState, true, hasSt, stAlreadyWithheld);
-    const exit = convertCfop(originalCfop, userState, destinationState, false, hasSt, stAlreadyWithheld);
-    const internalExit = convertCfop(originalCfop, userState, userState, false, hasSt, stAlreadyWithheld);
-
-    const newConsultation: CfopConsultation = {
-      id: Date.now().toString(),
-      productDescription,
-      ncm: ncmQuery,
-      originalCfop,
-      originState,
-      userState,
-      destinationState,
-      suggestedEntryCfop: entry,
-      suggestedExitCfop: exit,
-      suggestedInternalExitCfop: internalExit,
-      hasSt,
-      alerts,
-      timestamp: Date.now()
-    };
-
-    setResult(newConsultation);
-    saveToHistory(newConsultation);
   };
 
-  const copyToClipboard = (text: string) => {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const isAtypical = (cfop: string) => {
@@ -291,11 +300,11 @@ const CfopConsultant: React.FC = () => {
                 <div className="grid grid-cols-1 gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-blue-500 transition-all relative">
                     <button 
-                      onClick={() => copyToClipboard(result.suggestedEntryCfop)}
-                      className="absolute top-4 right-4 text-slate-300 hover:text-blue-600 transition-colors"
+                      onClick={() => copyToClipboard(result.suggestedEntryCfop, 'entry')}
+                      className={`absolute top-4 right-4 transition-colors ${copiedId === 'entry' ? 'text-emerald-500' : 'text-slate-300 hover:text-blue-600'}`}
                       title="Copiar CFOP"
                     >
-                      <i className="fas fa-copy"></i>
+                      <i className={`fas ${copiedId === 'entry' ? 'fa-check' : 'fa-copy'}`}></i>
                     </button>
                     <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2">Entrada Sugerida</p>
                     <div className="flex items-baseline gap-2">
@@ -309,11 +318,11 @@ const CfopConsultant: React.FC = () => {
                   <div className="grid grid-cols-1 gap-4">
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-emerald-500 transition-all relative">
                       <button 
-                        onClick={() => copyToClipboard(result.suggestedExitCfop)}
-                        className="absolute top-4 right-4 text-slate-300 hover:text-emerald-600 transition-colors"
+                        onClick={() => copyToClipboard(result.suggestedExitCfop, 'exit')}
+                        className={`absolute top-4 right-4 transition-colors ${copiedId === 'exit' ? 'text-emerald-500' : 'text-slate-300 hover:text-emerald-600'}`}
                         title="Copiar CFOP"
                       >
-                        <i className="fas fa-copy"></i>
+                        <i className={`fas ${copiedId === 'exit' ? 'fa-check' : 'fa-copy'}`}></i>
                       </button>
                       <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Saída ({result.destinationState})</p>
                       <div className="flex items-baseline gap-2">

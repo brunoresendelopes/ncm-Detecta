@@ -48,19 +48,19 @@ const FiscalTools: React.FC<FiscalToolsProps> = ({ onResults }) => {
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-slate-200 p-1.5 rounded-2xl shadow-inner">
+      <div className="flex bg-slate-200 p-1.5 rounded-2xl shadow-inner overflow-x-auto no-scrollbar">
         {[
-          { id: 'classify', label: 'Classificador Guiado', icon: 'fa-wand-magic-sparkles', color: 'text-blue-600' },
-          { id: 'xml', label: 'Importar XML', icon: 'fa-code', color: 'text-emerald-600' },
-          { id: 'key', label: 'Chave de NF-e', icon: 'fa-barcode', color: 'text-indigo-600' }
+          { id: 'classify', label: 'Classificador', icon: 'fa-wand-magic-sparkles', color: 'text-blue-600' },
+          { id: 'xml', label: 'XML', icon: 'fa-code', color: 'text-emerald-600' },
+          { id: 'key', label: 'Chave NF-e', icon: 'fa-barcode', color: 'text-indigo-600' }
         ].map(tab => (
           <button 
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 py-3.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeTab === tab.id ? `bg-white ${tab.color} shadow-lg` : 'text-slate-500 hover:text-slate-700'}`}
+            className={`flex-1 py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap px-4 ${activeTab === tab.id ? `bg-white ${tab.color} shadow-lg` : 'text-slate-500 hover:text-slate-700'}`}
           >
             <i className={`fas ${tab.icon}`}></i>
-            <span className="hidden md:inline">{tab.label}</span>
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>
