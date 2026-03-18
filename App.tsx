@@ -421,7 +421,7 @@ const App: React.FC = () => {
                       </div>
                       <button 
                         onClick={(e) => deleteHistoryItem(e, i)}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         title="Remover do histórico"
                       >
                         <i className="fas fa-trash-can text-xs"></i>
