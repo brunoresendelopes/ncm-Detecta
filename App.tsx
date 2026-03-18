@@ -93,6 +93,18 @@ const App: React.FC = () => {
     setView(ViewMode.SEARCH);
   };
 
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900">
       {/* Sidebar */}
@@ -132,14 +144,28 @@ const App: React.FC = () => {
               <i className="fas fa-history"></i> Histórico
             </button>
           </li>
+          <li>
+            <button onClick={toggleFullScreen} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-bold text-sm hover:bg-slate-800 text-slate-400">
+              <i className="fas fa-expand"></i> Tela Cheia
+            </button>
+          </li>
         </ul>
 
         {/* Disclaimer na Sidebar */}
-        <div className="mt-auto p-4 bg-slate-800/50 rounded-xl border border-white/5">
-          <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-2">Aviso Legal</p>
-          <p className="text-[10px] text-slate-400 leading-tight">
-            As informações apresentadas têm caráter informativo. Recomendamos validar a classificação definitiva com seu contador ou nos canais oficiais.
-          </p>
+        <div className="mt-auto space-y-4">
+          <div className="p-4 bg-blue-600/10 rounded-xl border border-blue-600/20">
+            <p className="text-[9px] text-blue-400 uppercase font-bold tracking-wider mb-2">Dica de App</p>
+            <p className="text-[10px] text-blue-200 leading-tight">
+              Para usar em tela cheia no celular, toque em "Compartilhar" e selecione "Adicionar à Tela de Início".
+            </p>
+          </div>
+          
+          <div className="p-4 bg-slate-800/50 rounded-xl border border-white/5">
+            <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-2">Aviso Legal</p>
+            <p className="text-[10px] text-slate-400 leading-tight">
+              As informações apresentadas têm caráter informativo. Recomendamos validar a classificação definitiva com seu contador ou nos canais oficiais.
+            </p>
+          </div>
         </div>
       </nav>
 
